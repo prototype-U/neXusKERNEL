@@ -45,9 +45,6 @@ Original Auther:
 #include <linux/rtc.h>
 #include <linux/slab.h>
 #include <mach/board.h>
-
-#include <linux/fastchg.h>
-
 #define MSPERIOD(end, start)	ktime_to_ms(ktime_sub(end, start))
 
 struct ds2746_device_info {
@@ -1244,11 +1241,7 @@ static int cable_status_handler_func(struct notifier_block *nfb,
 		}
 	} else if (cable_type == CONNECT_TYPE_USB) {
 		poweralg.is_cable_in = 1;
-		if (force_fast_charge == 1) {
-			poweralg.is_china_ac_in = 1;
-		} else {
-			poweralg.is_china_ac_in = 0;
-		}
+		poweralg.is_china_ac_in = 0;
 		poweralg.is_super_ac = 0;
 		poweralg.charging_source = cable_type;
 		cable_remove_ktime = ktime_get_real();
