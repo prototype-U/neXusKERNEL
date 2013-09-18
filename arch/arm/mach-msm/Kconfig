@@ -2684,4 +2684,11 @@ config HTC_MSM7K_WAIT_AMSS_READY
 	help
 	  HTC MSM7K wait AMSS Ready before msm_clock_init
 
+config FORCE_FAST_CHARGE
+	bool "Force AC charge mode at will"
+	default y
+	help
+		A simple sysfs interface to force adapters that
+		are detected as USB to charge as AC.
+
 endif
