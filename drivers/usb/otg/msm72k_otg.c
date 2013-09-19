@@ -34,7 +34,9 @@
 #include <mach/msm_xo.h>
 #include <linux/usb/htc_info.h>
 #include <linux/usb/hcd.h>
-
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
 #include <mach/cable_detect.h>
 
 #define MSM_USB_BASE	(dev->regs)
@@ -80,11 +82,19 @@ static void send_usb_connect_notify(struct work_struct *w)
 	list_for_each_entry(notifier, &g_lh_usb_notifier_list, notifier_link) {
 		if (notifier->func != NULL) {
 			
-			
+#ifdef CONFIG_FORCE_FAST_CHARGE
+		if (force_fast_charge == 1){
+			if (motg->connect_type == CONNECT_TYPE_UNKNOWN)
+				notifier->func(CONNECT_TYPE_AC);
+			else
+				notifier->func(motg->connect_type);}
+		else {
 			if (motg->connect_type == CONNECT_TYPE_UNKNOWN)
 				notifier->func(CONNECT_TYPE_USB);
 			else
 				notifier->func(motg->connect_type);
+			}
+#endif
 		}
 	}
 	mutex_unlock(&notify_sem);
@@ -728,6 +738,14 @@ static void msm_otg_notify_charger_attached(int connect_type)
 		}
 		break;
 	case CONNECT_TYPE_USB:
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if(force_fast_charge==1) {
+		if (atomic_read(&motg->chg_type) != USB_CHG_TYPE__WALLCHARGER)
+			atomic_set(&motg->chg_type, USB_CHG_TYPE__WALLCHARGER);
+		motg->ac_detect_count = 0;
+		del_timer(&motg->ac_detect_timer);
+		motg->connect_type = CONNECT_TYPE_AC;
+	} else {
 		if (atomic_read(&motg->chg_type) != USB_CHG_TYPE__SDP)
 			atomic_set(&motg->chg_type, USB_CHG_TYPE__SDP);
 		motg->ac_detect_count = 0;
@@ -739,6 +757,8 @@ static void msm_otg_notify_charger_attached(int connect_type)
 			
 			return;
 		}
+	}
+#endif
 		break;
 	case CONNECT_TYPE_AC:
 		if (atomic_read(&motg->chg_type) != USB_CHG_TYPE__WALLCHARGER)

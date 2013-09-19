@@ -299,10 +299,10 @@ static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_1008_2p0[] = {
 	{ 0, 504000, ACPU_PLL_4, 6, 1, 63000, 3, 6, 160000 },
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 160000 },
 	{ 1, 1008000, ACPU_PLL_4, 6, 0, 126000, 3, 7, 200000},
-#ifdef CONFIG_NEXUS_CPU_OC
+/*#ifdef CONFIG_NEXUS_CPU_OC
 	{ 1, 1209600, ACPU_PLL_4, 6, 0, 151200, 3, 7, 200000 },
 	{ 1, 1401600, ACPU_PLL_4, 6, 0, 175000, 3, 7, 200000 },
-#endif
+#endif*/
 	{ 0 }
 };
 
@@ -450,7 +450,7 @@ static struct clkctl_acpu_speed pll0_960_pll1_737_pll2_1200_25a[] = {
 	{ 1, 600000, ACPU_PLL_2, 2, 1, 75000, 3, 6, 200000 },
 	{ 0 }
 };
-#define PLL_1008_MHZ	52
+//#define PLL_1008_MHZ	52
 
 #define PLL_CONFIG(m0, m1, m2, m4) { \
 	m0, m1, m2, m4, \
@@ -577,7 +577,7 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 
 	
 	clk_div = (reg_clksel >> 1) & 0x03;
-/*#ifdef CONFIG_NEXUS_CPU_OC
+/* #ifdef CONFIG_NEXUS_CPU_OC
 // Perform overclocking if requested 
 	if (hunt_s->a11clk_khz > 1008000) {
 //		Change the speed of PLL4
@@ -610,7 +610,8 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 //	Restore the speed of PLL4 *
 		writel(PLL_1008_MHZ, PLL4_L_VAL_ADDR);
 		udelay(50);
-} */
+}
+#else */
 	mb();
 	udelay(50);
 //#endif
