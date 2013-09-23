@@ -287,7 +287,7 @@ static struct clkctl_acpu_speed pll0_960_pll1_196_pll2_1200_pll4_1401[] = {
 	{ 1, 1401600, ACPU_PLL_4, 6, 0, 175000, 3, 7, 200000, &pll4_cfg_tbl[3]},
 	{ 0 }
 };
-//2 SUCCESS !!!
+
 static struct clkctl_acpu_speed pll0_960_pll1_245_pll2_1200_pll4_1008_2p0[] = {
 	{ 0, 19200, ACPU_PLL_TCXO, 0, 0, 2400, 3, 0, 30720 },
 	{ 0, 61440, ACPU_PLL_1, 1, 3,  7680, 3, 1, 61440 },
@@ -577,14 +577,15 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 
 	
 	clk_div = (reg_clksel >> 1) & 0x03;
-/* #ifdef CONFIG_NEXUS_CPU_OC
+
+/*#ifdef CONFIG_NEXUS_CPU_OC
 // Perform overclocking if requested 
 	if (hunt_s->a11clk_khz > 1008000) {
 //		Change the speed of PLL4
-		writel(hunt_s->a11clk_khz/19200,PLL4_L_VAL_ADDR);
+		writel_relaxed(hunt_s->a11clk_khz/19200,PLL4_L_VAL_ADDR);
 		udelay(50);
 }
-#endif */
+#endif*/
 	src_sel = reg_clksel & 1;
 
 	if (hunt_s->ahbclk_div > clk_div) {
@@ -605,16 +606,16 @@ static void acpuclk_set_div(const struct clkctl_acpu_speed *hunt_s)
 	writel_relaxed(reg_clksel, A11S_CLK_SEL_ADDR);
 
 /*#ifdef CONFIG_NEXUS_CPU_OC
-//	Recover from overclocking
+		//	Recover from overclocking
 		if (hunt_s->a11clk_khz<=1008000) {
-//	Restore the speed of PLL4 *
-		writel(PLL_1008_MHZ, PLL4_L_VAL_ADDR);
-		udelay(50);
-}
-#else */
+			//	Restore the speed of PLL4 *
+			writel_relaxed(PLL_1008_MHZ, PLL4_L_VAL_ADDR);
+			mb();
+			udelay(50);
+		}
+#endif*/
 	mb();
 	udelay(50);
-//#endif
 
 	if (hunt_s->ahbclk_div < clk_div) {
 		reg_clksel &= ~(0x3 << 1);
