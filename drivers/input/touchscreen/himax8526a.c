@@ -615,7 +615,7 @@ static ssize_t touch_vendor_show(struct device *dev,
 
 static DEVICE_ATTR(vendor, 0444, touch_vendor_show, NULL);
 
-/*static ssize_t touch_attn_show(struct device *dev,
+static ssize_t touch_attn_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
 {
 	ssize_t ret = 0;
@@ -627,8 +627,8 @@ static DEVICE_ATTR(vendor, 0444, touch_vendor_show, NULL);
 
 	return ret;
 }
-*/
-//static DEVICE_ATTR(attn, 0444, touch_attn_show, NULL);
+
+static DEVICE_ATTR(attn, 0444, touch_attn_show, NULL);
 
 static ssize_t himax_debug_level_show(struct device *dev,
 		struct device_attribute *attr, char *buf)
@@ -1165,11 +1165,11 @@ static int himax_touch_sysfs_init(void)
 	ret = sysfs_create_file(android_touch_kobj, &dev_attr_reset.attr);
 	if (ret) {
 		printk(KERN_ERR "[TP][TOUCH_ERR]%s: sysfs_create_file failed\n", __func__);
-//		return ret;
-//	}
-//	ret = sysfs_create_file(android_touch_kobj, &dev_attr_attn.attr);
-//	if (ret) {
-//		printk(KERN_ERR "[TP][TOUCH_ERR]%s: sysfs_create_file failed\n", __func__);
+		return ret;
+	}
+	ret = sysfs_create_file(android_touch_kobj, &dev_attr_attn.attr);
+	if (ret) {
+		printk(KERN_ERR "[TP][TOUCH_ERR]%s: sysfs_create_file failed\n", __func__);
 		return ret;
 	}
 	ret = sysfs_create_file(android_touch_kobj, &dev_attr_s2wswitch.attr);
@@ -1201,12 +1201,12 @@ static void himax_touch_sysfs_deinit(void)
 	sysfs_remove_file(android_touch_kobj, &dev_attr_vendor.attr);
 	sysfs_remove_file(android_touch_kobj, &dev_attr_htc_event.attr);
 	sysfs_remove_file(android_touch_kobj, &dev_attr_reset.attr);
-//	sysfs_remove_file(android_touch_kobj, &dev_attr_attn.attr);
+	sysfs_remove_file(android_touch_kobj, &dev_attr_attn.attr);
 	sysfs_remove_file(android_touch_kobj, &dev_attr_s2wswitch.attr);
 #ifdef FAKE_EVENT
 	sysfs_remove_file(android_touch_kobj, &dev_attr_fake_event.attr);
 #endif
-//	sysfs_remove_file(android_touch_kobj, &dev_attr_sr_en.attr);
+	sysfs_remove_file(android_touch_kobj, &dev_attr_sr_en.attr);
 	kobject_del(android_touch_kobj);
 }
 
@@ -1795,12 +1795,11 @@ static int himax8526a_suspend(struct i2c_client *client, pm_message_t mesg)
 	}
 #endif
 
+	printk(KERN_DEBUG "[TP]%s: diag_command= %d\n", __func__, ts->diag_command);
 #ifdef HIMAX_S2W
 	if (s2w_switch)
 		enable_irq_wake(client->irq);
 #endif
-
-	printk(KERN_DEBUG "[TP]%s: diag_command= %d\n", __func__, ts->diag_command);
 
 	printk(KERN_INFO "[TP]%s: enter\n", __func__);
 #ifdef HIMAX_S2W
@@ -1846,12 +1845,12 @@ static int himax8526a_suspend(struct i2c_client *client, pm_message_t mesg)
 
 static int himax8526a_resume(struct i2c_client *client)
 {
-	struct himax_ts_data *ts = i2c_get_clientdata(client);
 	uint8_t data[2] = { 0 };
 	const uint8_t command_ec_128_raw_flag = 0x01;
 	const uint8_t command_ec_128_raw_baseline_flag = 0x02 | command_ec_128_raw_flag;
 	uint8_t new_command[2] = {0x91, 0x00};
 
+	struct himax_ts_data *ts = i2c_get_clientdata(client);
 #ifdef HIMAX_S2W
 	if (s2w_switch)
 	disable_irq_wake(client->irq);
