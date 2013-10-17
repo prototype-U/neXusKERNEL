@@ -32,7 +32,7 @@
 
 void himax_s2w_release(void);
 int himax_s2w_status(void);
-
+static DEFINE_MUTEX(pwrkeyworklock);
 #ifdef CONFIG_TOUCHSCREEN_HIMAX_S2W
 #define HIMAX_S2W
 #endif
